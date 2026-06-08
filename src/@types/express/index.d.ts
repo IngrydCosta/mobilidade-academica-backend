@@ -3,6 +3,7 @@ declare namespace Express {
     user: {
       id: string;
       perfil: string;
+      universityId?: string | null;
     };
   }
 }

@@ -63,7 +63,7 @@ export class UserService {
     if (!getUserId) {
       return "Usuário não encontrado!";
     }
-    const updatedUser = prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: {
         id,
       },
@@ -72,15 +72,9 @@ export class UserService {
         email,
         password: passwordHash,
         perfil,
-        ...(universityId && {
-          university: {
-            connect: {
-              id: universityId,
+        universityId: universityId !== undefined ? (universityId || null) : undefined,
             },
-          },
-        }),
-      },
-    });
+          });
 
     return updatedUser;
   }
