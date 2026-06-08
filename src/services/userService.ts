@@ -1,6 +1,7 @@
 import { UserRole } from "@prisma/client";
 import { prisma } from "../database/prisma";
-import universityRoutes from "../routes/universityRoutes";
+import { hash } from "bcryptjs";
+
 
 export class UserService {
   async create(
@@ -10,11 +11,14 @@ export class UserService {
     perfil: UserRole,
     universityId?: string,
   ) {
+
+    const passwordHash = await hash(password, 8);
+    
     return prisma.user.create({
       data: {
         nome,
         email,
-        password,
+        password: passwordHash,
         perfil,
         ...(universityId && {
         university: {
@@ -47,7 +51,10 @@ export class UserService {
     perfil: UserRole,
     universityId: string,
   ) {
-    const getUserId = prisma.user.findUnique({
+
+    const passwordHash = await hash(password, 8);
+
+    const getUserId = await prisma.user.findUnique({
       where: {
         id,
       },
@@ -63,7 +70,7 @@ export class UserService {
       data: {
         nome,
         email,
-        password,
+        password: passwordHash,
         perfil,
         ...(universityId && {
           university: {
@@ -96,4 +103,6 @@ export class UserService {
     });
     return "Usuário deletado com sucesso!";
   }
+
+
 }
