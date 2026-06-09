@@ -1,10 +1,9 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "../types/auth";
 import { UserRole } from "@prisma/client";
 
-
-
 export function isAuthenticated(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -17,7 +16,7 @@ export function isAuthenticated(
 
 
 export function isAdmin(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -33,7 +32,7 @@ export function isAdmin(
 }
 
 export function canManageMobility(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -53,7 +52,7 @@ export function canManageMobility(
 
 
 export function canView(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -65,7 +64,7 @@ export function canView(
 }
 
 export function sameUniversityOrAdmin(
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) {

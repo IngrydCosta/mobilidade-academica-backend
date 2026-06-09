@@ -27,7 +27,7 @@ export class UniversityController{
             nome,
             pais
         );
-
+        
         return response.status(201).json(university);
     }
 

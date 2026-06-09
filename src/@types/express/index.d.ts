@@ -1,9 +1,13 @@
-declare namespace Express {
-  export interface Request {
-    user: {
+import "express-serve-static-core";
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: {
       id: string;
       perfil: string;
       universityId?: string | null;
     };
   }
 }
+
+export {};

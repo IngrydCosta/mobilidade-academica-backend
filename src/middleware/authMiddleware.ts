@@ -1,4 +1,5 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "../types/auth";
 import jwt from "jsonwebtoken";
 
 interface TokenPayload {
@@ -9,11 +10,13 @@ interface TokenPayload {
 }
 
 export async function authMiddleware(
-  request: Request,
+  request: AuthRequest,
   response: Response,
   next: NextFunction
 ) {
-
+  
+  console.log("AUTH MIDDLEWARE EXECUTOU");
+  
   const authHeader = request.headers.authorization;
 
   if (!authHeader) {
@@ -31,7 +34,7 @@ export async function authMiddleware(
       process.env.JWT_SECRET as string
     ) as TokenPayload;
 
-    request.user = {
+    (request as any).user = {
       id: decoded.sub,
       perfil: decoded.perfil,
     };

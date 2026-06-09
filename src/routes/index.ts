@@ -9,6 +9,6 @@ const routes = Router();
 routes.use("/university", universityRoutes);
 routes.use("/mobility", mobilityRoutes);
 routes.use("/user", userRoutes);
-routes.use("/auth", authRoutes)
+routes.use("/login", authRoutes)
 
 export default routes;
