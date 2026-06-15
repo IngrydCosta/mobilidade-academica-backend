@@ -8,10 +8,10 @@ const userRoutes = Router();
 
 const userController = new UserController();
 
-userRoutes.post("/", userController.create);
+userRoutes.post("/",  authMiddleware, isAdmin,  userController.create);
 userRoutes.get("/", authMiddleware, isAdmin, userController.getUser);
-userRoutes.get("/:id", userController.getUserById);
-userRoutes.put("/:id", userController.updateUser);
-userRoutes.delete("/:id", userController.deleteUser);
+userRoutes.get("/:id", authMiddleware, isAdmin, userController.getUserById);
+userRoutes.put("/:id", authMiddleware, isAdmin, userController.updateUser);
+userRoutes.delete("/:id", authMiddleware, isAdmin, userController.deleteUser);
 
 export default userRoutes;
