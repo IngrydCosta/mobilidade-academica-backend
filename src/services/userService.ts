@@ -13,13 +13,17 @@ export class UserService {
   ) {
 
     const passwordHash = await hash(password, 8);
-    
+
+    if (perfil === UserRole.GESTOR_MOBILIDADE) {
+    throw new Error("Para o perfil de Gestor de Mobilidade, a universidade é obrigatória.");
+  }
+
     return prisma.user.create({
       data: {
         nome,
         email,
         password: passwordHash,
-        perfil,
+        perfil: perfil,
         ...(universityId && {
         university: {
           connect: {

@@ -8,8 +8,8 @@ const userRoutes = Router();
 
 const userController = new UserController();
 
-userRoutes.post("/",  authMiddleware, isAdmin,  userController.create);
-userRoutes.get("/", authMiddleware, isAdmin, userController.getUser);
+userRoutes.post("/",  userController.create);
+userRoutes.get("/",  userController.getUser);
 userRoutes.get("/:id", authMiddleware, isAdmin, userController.getUserById);
 userRoutes.put("/:id", authMiddleware, isAdmin, userController.updateUser);
 userRoutes.delete("/:id", authMiddleware, isAdmin, userController.deleteUser);

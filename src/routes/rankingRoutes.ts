@@ -7,6 +7,6 @@ const router = Router();
 
 const controller = new RankingController();
 
-router.get("/ranking", isAuthenticated, authMiddleware, controller.getRanking);
+router.get("/",  controller.getRanking);
 
 export default router;
