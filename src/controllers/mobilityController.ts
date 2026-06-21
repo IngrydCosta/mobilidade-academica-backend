@@ -32,6 +32,8 @@ export class MobilityController {
             universityId
         );
 
+    
+
         return response.status(201).json(mobility);
 
     }

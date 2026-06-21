@@ -14,9 +14,14 @@ export class UserService {
 
     const passwordHash = await hash(password, 8);
 
-    if (perfil === UserRole.GESTOR_MOBILIDADE) {
-    throw new Error("Para o perfil de Gestor de Mobilidade, a universidade é obrigatória.");
-  }
+    if (
+      perfil === UserRole.GESTOR_MOBILIDADE &&
+      (!universityId || universityId.trim() === "")
+    ) {
+      throw new Error(
+        "Para o perfil de Gestor de Mobilidade, a universidade é obrigatória."
+      );
+    }
 
     return prisma.user.create({
       data: {
@@ -35,7 +40,11 @@ export class UserService {
     });
   }
   async findAll() {
-    return prisma.user.findMany();
+    return prisma.user.findMany({
+      include: {
+        university: true,
+      }
+    });
 
   }
 
