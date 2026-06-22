@@ -5,7 +5,7 @@ const service = new RankingService();
 
 export class RankingController {
   async getRanking(req: Request, res: Response) {
-    console.log("chegou?")
+console.log( req.query)
     try {
       const year = Number(req.query.year);
   

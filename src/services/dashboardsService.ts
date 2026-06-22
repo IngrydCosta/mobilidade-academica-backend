@@ -2,39 +2,55 @@ import { prisma } from "../database/prisma";
 
 export class DashboardsService {
   async dashPublicService() {
-    const mobility = await prisma.mobility.findMany({
+    const mobilities = await prisma.mobility.findMany({
       include: {
         university: true,
       },
     });
 
-    const totalEnviados = mobility.reduce(
-      (acc, item) => acc + item.enviados,
-      0
-    );
-
-    const totalRecebidos = mobility.reduce(
-      (acc, item) => acc + item.recebidos,
-      0
-    );
-
+    
+    const totalEnviados = mobilities.reduce((acc, item) => acc + item.enviados, 0);
+    const totalRecebidos = mobilities.reduce((acc, item) => acc + item.recebidos, 0);
     const total = totalEnviados + totalRecebidos;
 
     const universities = await prisma.university.count();
 
-    const yearMap = new Map<number, number>();
+    const countries = new Set(mobilities.map(m => m.university.pais));
+    const totalPaises = countries.size;
 
-    mobility.forEach((m) => {
-      const current = yearMap.get(m.ano) || 0;
-      yearMap.set(m.ano, current + (m.enviados + m.recebidos));
+    const yearData = new Map<number, { enviados: number; recebidos: number }>();
+
+    mobilities.forEach((m) => {
+      const current = yearData.get(m.ano) || { enviados: 0, recebidos: 0 };
+      yearData.set(m.ano, {
+        enviados: current.enviados + m.enviados,
+        recebidos: current.recebidos + m.recebidos,
+      });
     });
 
+    const grafico = Array.from(yearData.entries())
+      .sort((a, b) => a[0] - b[0]) 
+      .map(([ano, values]) => ({
+        ano: ano.toString(),
+        enviados: values.enviados,
+        recebidos: values.recebidos,
+      }));
+
+      const validYears = Array.from(yearData.entries())
+    .filter(([_, values]) => (values.enviados + values.recebidos) > 0);
+
+  const mediaPorAno = validYears.length > 0 
+    ? Math.round(total / validYears.length) 
+    : 0;
+
+  
     let bestYear = 0;
     let max = 0;
 
-    yearMap.forEach((value, key) => {
-      if (value > max) {
-        max = value;
+    yearData.forEach((value, key) => {
+      const totalAno = value.enviados + value.recebidos;
+      if (totalAno > max) {
+        max = totalAno;
         bestYear = key;
       }
     });
@@ -47,9 +63,13 @@ export class DashboardsService {
         anoTop: bestYear,
       },
 
+      grafico, 
+
       indicators: {
+        mediaPorAno,
         universidades: universities,
-        totalRegistros: mobility.length,
+        paises: totalPaises,
+        totalRegistros: mobilities.length,
       },
     };
   }
@@ -59,13 +79,39 @@ export class DashboardsService {
     country?: string;
     year?: number;
   }) {
-    const mobilities = await prisma.mobility.findMany({
-      include: {
-        university: true,
-      },
+    let mobilities = await prisma.mobility.findMany({
+      include: { university: true },
     });
 
-    let data = mobilities.map((m) => ({
+  
+    if (filters.university) {
+      
+      mobilities = mobilities.filter((m) =>
+        m.university.id === filters.university);
+      
+    }
+    if (filters.country) {
+      mobilities = mobilities.filter((m) => m.university.pais.toLowerCase() === filters.country!.toLowerCase()
+  );
+}
+    if (filters.year) {
+      const yearToFilter = Number(filters.year);
+      mobilities = mobilities.filter((m) => m.ano === yearToFilter);
+}
+    
+    
+    if (mobilities.length === 0) {
+    return {
+      cards: { total: 0, enviados: 0, recebidos: 0, anoTop: 0 },
+      grafico: [],
+      table: [],
+    };
+  }
+
+  const totalEnviados = mobilities.reduce((acc, m) => acc + m.enviados, 0);
+  const totalRecebidos = mobilities.reduce((acc, m) => acc + m.recebidos, 0);
+
+    const table = mobilities.map((m) => ({
       universidade: m.university.nome,
       pais: m.university.pais,
       ano: m.ano,
@@ -74,43 +120,35 @@ export class DashboardsService {
       total: m.enviados + m.recebidos,
     }));
 
-    if (filters.university) {
-      data = data.filter((d) =>
-        d.universidade
-          .toLowerCase()
-          .includes(filters.university!.toLowerCase())
-      );
-    }
+    const yearData = new Map<number, { enviados: number; recebidos: number }>();
 
-    if (filters.country) {
-      data = data.filter((d) => d.pais === filters.country);
-    }
-
-    if (filters.year) {
-      data = data.filter((d) => d.ano === filters.year);
-    }
-
-    const totalEnviados = data.reduce((acc, d) => acc + d.enviados, 0);
-    const totalRecebidos = data.reduce((acc, d) => acc + d.recebidos, 0);
-
-    const yearMap = new Map<number, number>();
-
-    data.forEach((d) => {
-      const current = yearMap.get(d.ano) || 0;
-      yearMap.set(d.ano, current + d.total);
+    mobilities.forEach((m) => {
+      const current = yearData.get(m.ano) || { enviados: 0, recebidos: 0 };
+      yearData.set(m.ano, {
+        enviados: current.enviados + m.enviados,
+        recebidos: current.recebidos + m.recebidos,
+      });
     });
 
-    const charts = Object.fromEntries(yearMap);
+    const grafico = Array.from(yearData.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([ano, values]) => ({
+        ano: ano.toString(),
+        enviados: values.enviados,
+        recebidos: values.recebidos,
+      }));
+
+
 
     let bestYear = 0;
     let max = 0;
-
-    for (const [year, value] of Object.entries(charts)) {
-      if (Number(value) > max) {
-        max = Number(value);
-        bestYear = Number(year);
+    yearData.forEach((value, key) => {
+      const totalYear = value.enviados + value.recebidos;
+      if (totalYear > max) {
+        max = totalYear;
+        bestYear = key;
       }
-    }
+    });
 
     return {
       cards: {
@@ -120,9 +158,8 @@ export class DashboardsService {
         anoTop: bestYear,
       },
 
-      table: data,
-
-      charts,
+      grafico,        
+      table,
     };
   }
 }

@@ -1,11 +1,10 @@
 import { prisma } from "../database/prisma";
 
 export class RankingService {
-  async getRanking(year: number) {
+  async getRanking(year?: number) {
+    const whereClause = year ? { ano: year } : {};
     const mobilities = await prisma.mobility.findMany({
-      where: {
-        ano: year,
-      },
+      where: whereClause,
       include: {
         university: true,
       },

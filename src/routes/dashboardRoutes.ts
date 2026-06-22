@@ -7,9 +7,8 @@ const dashboardRoutes = Router();
 
 const controller = new DashboardsController();
 
-dashboardRoutes.get("/dashboard/public", controller.getPublicDashboard);
+dashboardRoutes.get("/public", controller.getPublicDashboard);
 
-dashboardRoutes.get(
-  "/dashboard/private", isAuthenticated, authMiddleware, controller.getPrivateDashboard);
+dashboardRoutes.get("/private", authMiddleware, isAuthenticated, controller.getPrivateDashboard);
 
 export default dashboardRoutes;

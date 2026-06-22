@@ -2,15 +2,30 @@ import { prisma } from "../database/prisma";
 
 export class MobilityService{
 
-    async create (ano: number, enviados: number, recebidos: number, universityId: string){
+    async create (ano: number, enviados: number, recebidos: number, universityIdentifier: string){
 
-        return prisma.mobility.create({
+      let university = await prisma.university.findUnique({
+    where: { id: universityIdentifier }
+  });
+
+  if (!university) {
+    university = await prisma.university.findFirst({
+      where: { nome: universityIdentifier }
+    });
+  }
+
+  if (!university) {
+    throw new Error("Universidade não encontrada");
+  }
+        
+      
+      return prisma.mobility.create({
             data: {
                 ano,
                 enviados,
                 recebidos,
                 university:{
-                    connect: {id: universityId}
+                    connect: {id: universityIdentifier}
                 }
             }
         });
