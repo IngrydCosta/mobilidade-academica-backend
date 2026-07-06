@@ -51,8 +51,23 @@ model Mobility {
   recebidos     Int
 
   universityId  String
+  students      MobilityStudent[]
   university    University @relation(fields: [universityId], references: [id])
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model MobilityStudent{
+  id             String @id @default(uuid())
+  matricula      String
+  nome           String
+  email          String
+  paisOrigem     String
+  paisDestino    String
+  cursoOrigem    String
+  cursoDestino   String
+
+  mobilityId     String
+  mobility       Mobility @relation(fields: [mobilityId], references: [id])
 }

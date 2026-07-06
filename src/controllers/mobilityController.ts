@@ -23,14 +23,15 @@ export class MobilityController {
 
     async create(request: Request, response: Response) {
 
-        const { ano, enviados, recebidos, universityId } = request.body;
+        const { ano, enviados, recebidos, universityId, estudantes } = request.body;
 
-        const mobility = await mobilityService.create(
+        const mobility = await mobilityService.create({
             ano,
             enviados,
             recebidos,
-            universityId
-        );
+            universityId,
+            estudantes,
+    });
 
     
 

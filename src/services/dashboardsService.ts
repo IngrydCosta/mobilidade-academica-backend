@@ -5,6 +5,7 @@ export class DashboardsService {
     const mobilities = await prisma.mobility.findMany({
       include: {
         university: true,
+       
       },
     });
 
@@ -80,7 +81,10 @@ export class DashboardsService {
     year?: number;
   }) {
     let mobilities = await prisma.mobility.findMany({
-      include: { university: true },
+      include: {
+         university: true,
+         students: true,
+         },
     });
 
   
@@ -118,6 +122,7 @@ export class DashboardsService {
       enviados: m.enviados,
       recebidos: m.recebidos,
       total: m.enviados + m.recebidos,
+      students: m.students,
     }));
 
     const yearData = new Map<number, { enviados: number; recebidos: number }>();
