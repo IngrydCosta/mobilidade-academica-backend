@@ -40,11 +40,22 @@ export class UserService {
     });
   }
   async findAll() {
-    return prisma.user.findMany({
-      include: {
-        university: true,
+
+    const users = prisma.user.findMany({
+      select: {
+        id: true, 
+        nome: true,
+        email: true,
+        university: {
+          select:{
+            id: true,
+            nome: true,
+            pais: true
+          }
+        }
       }
-    });
+    })
+    return users
 
   }
 

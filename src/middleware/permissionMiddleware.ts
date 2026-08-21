@@ -50,19 +50,6 @@ export function canManageMobility(
   return res.status(403).json({ message: "Sem permissão para mobilidade" });
 }
 
-
-export function canView(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) {
-  if (!req.user) {
-    return res.status(401).json({ message: "Usuário não autenticado" });
-  }
-
-  next();
-}
-
 export function sameUniversityOrAdmin(
   req: AuthRequest,
   res: Response,
