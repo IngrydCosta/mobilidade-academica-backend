@@ -24,15 +24,15 @@ export class AuthService {
       }
 
       if (!process.env.JWT_SECRET) {
-        throw new Error("JWT-SECRET não encontrado no .env");
+        throw new Error("JWT_SECRET não configurado nas variáveis de ambiente");
       }
 
       const token = jwt.sign(
         {
           perfil: user.perfil,
+          universityId: user.universityId || null,
         },
         process.env.JWT_SECRET as string,
-        
         {
           subject: user.id,
           expiresIn: "1d",

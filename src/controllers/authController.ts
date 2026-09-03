@@ -6,7 +6,7 @@ const authService = new AuthService();
 export class AuthController {
   async login(request: Request, response: Response) {
     try {
-      const { email, password } = request.body;
+      const { email, password } = request.body || {};
 
       if (!email || !password) {
         return response.status(400).json({
@@ -18,9 +18,9 @@ export class AuthController {
 
       return response.status(200).json(result);
     } catch (error) {
-      response.status(500).json({ message: error instanceof Error
-      ? error.message
-      : "Erro interno" });
+      return response.status(401).json({
+        message: error instanceof Error ? error.message : "Erro de autenticação",
+      });
     }
   }
 }

@@ -6,27 +6,36 @@ type StudentData = {
   email: string;
   paisOrigem: string;
   paisDestino: string;
+  tipoMobilidade: string;
   cursoOrigem: string;
   cursoDestino: string;
+  universidadeOrigem: string;
+  universidadeDestino: string;
 };
 
 type CreateMobilityData = {
   ano: number;
+  semestre?: number;
   enviados: number;
   recebidos: number;
   universityId: string;
-  estudantes?: StudentData[];
+  estudantes: StudentData[];
 };
 
 
 export class MobilityService {
   async create({
     ano,
+    semestre = 1,
     enviados,
     recebidos,
     universityId,
     estudantes = [],
   }: CreateMobilityData) {
+    if (!universityId) {
+      throw new Error("Universidade é obrigatória.");
+    }
+
     const university = await prisma.university.findUnique({
       where: {
         id: universityId,
@@ -39,9 +48,10 @@ export class MobilityService {
 
     return prisma.mobility.create({
       data: {
-        ano,
-        enviados,
-        recebidos,
+        ano: Number(ano),
+        semestre: Number(semestre) || 1,
+        enviados: Number(enviados),
+        recebidos: Number(recebidos),
         university: {
           connect: {
             id: universityId,
@@ -58,8 +68,11 @@ export class MobilityService {
     });
   }
 
-  async findAll() {
+  async findAll(universityId?: string) {
+    const whereClause = universityId ? { universityId } : {};
+
     return prisma.mobility.findMany({
+      where: whereClause,
       include: {
         university: true,
         students: true,
@@ -68,7 +81,7 @@ export class MobilityService {
   }
 
   async getMobilityId(id: string) {
-    return prisma.mobility.findUnique({
+    const mobility = await prisma.mobility.findUnique({
       where: {
         id,
       },
@@ -77,6 +90,12 @@ export class MobilityService {
         students: true,
       },
     });
+
+    if (!mobility) {
+      throw new Error("Mobilidade não encontrada");
+    }
+
+    return mobility;
   }
 
   async updateMobility(
@@ -85,6 +104,7 @@ export class MobilityService {
     enviados: number,
     recebidos: number,
     universityId: string,
+    semestre?: number
   ) {
     const mobility = await prisma.mobility.findUnique({
       where: {
@@ -93,7 +113,16 @@ export class MobilityService {
     });
 
     if (!mobility) {
-      return "Mobilidade não encontrada";
+      throw new Error("Mobilidade não encontrada");
+    }
+
+    if (universityId) {
+      const university = await prisma.university.findUnique({
+        where: { id: universityId },
+      });
+      if (!university) {
+        throw new Error("Universidade não encontrada");
+      }
     }
 
     return prisma.mobility.update({
@@ -101,10 +130,15 @@ export class MobilityService {
         id,
       },
       data: {
-        ano,
-        enviados,
-        recebidos,
+        ano: Number(ano),
+        semestre: semestre ? Number(semestre) : undefined,
+        enviados: Number(enviados),
+        recebidos: Number(recebidos),
         universityId,
+      },
+      include: {
+        university: true,
+        students: true,
       },
     });
   }
@@ -117,7 +151,7 @@ export class MobilityService {
     });
 
     if (!mobility) {
-      return "Mobilidade não encontrada";
+      throw new Error("Mobilidade não encontrada");
     }
 
     await prisma.mobility.delete({
@@ -126,6 +160,6 @@ export class MobilityService {
       },
     });
 
-    return "Mobilidade deletada com sucesso!";
+    return { message: "Mobilidade deletada com sucesso!" };
   }
 }

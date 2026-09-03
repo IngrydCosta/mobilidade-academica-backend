@@ -7,10 +7,10 @@ const mobilityRoutes = Router();
 
 const mobilityController = new MobilityController();
 
-mobilityRoutes.post("/",authMiddleware, isAdmin, canManageMobility, mobilityController.create);
-mobilityRoutes.get("/", authMiddleware, isAdmin, canManageMobility, mobilityController.getMobility);
-mobilityRoutes.get("/:id", authMiddleware, isAdmin, canManageMobility, mobilityController.getMobilityById);
-mobilityRoutes.put("/:id", authMiddleware, isAdmin, canManageMobility, mobilityController.updateMobility);
-mobilityRoutes.delete("/:id", authMiddleware, isAdmin, canManageMobility, mobilityController.deleteMobility);
+mobilityRoutes.post("/", authMiddleware, canManageMobility, mobilityController.create);
+mobilityRoutes.get("/", authMiddleware, canManageMobility, mobilityController.getMobility);
+mobilityRoutes.get("/:id", authMiddleware, canManageMobility, mobilityController.getMobilityById);
+mobilityRoutes.put("/:id", authMiddleware, canManageMobility, mobilityController.updateMobility);
+mobilityRoutes.delete("/:id", authMiddleware, canManageMobility, mobilityController.deleteMobility);
 
 export default mobilityRoutes;

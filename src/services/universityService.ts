@@ -2,6 +2,9 @@ import { prisma } from "../database/prisma";
 
 export class UniversityService {
   async create(nome: string, pais: string) {
+    if (!nome || !pais) {
+      throw new Error("Nome e país são obrigatórios.");
+    }
     return prisma.university.create({
       data: {
         nome,
@@ -9,61 +12,54 @@ export class UniversityService {
       },
     });
   }
+
   async findAll() {
-    const getAllUniversity = prisma.university.findMany();
-    return getAllUniversity;
+    return prisma.university.findMany();
   }
 
   async findById(id: string) {
-    return prisma.university.findUnique({
-      where: {
-        id,
-      },
+    const university = await prisma.university.findUnique({
+      where: { id },
     });
+    if (!university) {
+      throw new Error("Universidade não encontrada");
+    }
+    return university;
   }
 
   async updateUniversity(id: string, nome: string, pais: string) {
-    const findUniversity = prisma.university.findUnique({
-      where: {
-        id,
-      },
+    const findUniversity = await prisma.university.findUnique({
+      where: { id },
     });
 
     if (!findUniversity) {
-      return "Universidade não encontrada";
+      throw new Error("Universidade não encontrada");
     }
-    const updatedUniversity = prisma.university.update({
 
-        where:{
-            id,
-        },
-        data: {
-            nome,
-            pais
-        }
-    })
+    const updatedUniversity = await prisma.university.update({
+      where: { id },
+      data: {
+        nome,
+        pais,
+      },
+    });
+
     return updatedUniversity;
   }
 
   async deleteUniversity(id: string) {
     const findUniversity = await prisma.university.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
     if (!findUniversity) {
-      return "Universidade não encontrada";
+      throw new Error("Universidade não encontrada");
     }
-    
+
     await prisma.university.delete({
+      where: { id },
+    });
 
-        where:{
-            id,
-        },
-    })
-    return "Universidade deletada com sucesso!";
-
-
+    return { message: "Universidade deletada com sucesso!" };
   }
 }

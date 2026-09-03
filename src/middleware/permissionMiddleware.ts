@@ -63,18 +63,20 @@ export function sameUniversityOrAdmin(
     return next();
   }
 
-  const universityId =
-    req.params.universityId || req.body.universityId;
+  if (req.user.perfil === UserRole.GESTOR_MOBILIDADE) {
+    const universityId =
+      req.params?.universityId || req.params?.id || req.body?.universityId;
 
-  if (!universityId) {
-    return res.status(400).json({ message: "UniversityId obrigatório" });
+    if (!req.user.universityId) {
+      return res.status(403).json({ message: "Gestor sem universidade vinculada" });
+    }
+
+    if (universityId && req.user.universityId !== universityId) {
+      return res.status(403).json({ message: "Acesso restrito à sua universidade" });
+    }
+
+    return next();
   }
 
-  if (req.user.universityId !== universityId) {
-    return res.status(403).json({
-      message: "Acesso restrito à sua universidade",
-    });
-  }
-
-  next();
+  return res.status(403).json({ message: "Acesso não permitido para este perfil" });
 }
