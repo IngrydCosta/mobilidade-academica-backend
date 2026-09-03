@@ -1,11 +1,17 @@
 import express from "express";
-import routes from "./routes/index"
-import userRoutes from "./routes/userRoutes";
+import cors from "cors";
+import routes from "./routes/index";
 
 const app = express();
-const cors = require('cors');
 
-app.use(cors());
+const frontendUrl = process.env.FRONTEND_URL || "*";
+
+app.use(
+  cors({
+    origin: frontendUrl === "*" ? true : frontendUrl,
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 
 interface TokenPayload {
   perfil: string;
+  universityId?: string | null;
   iat: number;
   exp: number;
   sub: string;
@@ -14,9 +15,6 @@ export async function authMiddleware(
   response: Response,
   next: NextFunction
 ) {
-  
-  console.log("AUTH MIDDLEWARE EXECUTOU");
-  
   const authHeader = request.headers.authorization;
 
   if (!authHeader) {
@@ -27,20 +25,25 @@ export async function authMiddleware(
 
   const [, token] = authHeader.split(" ");
 
-  try {
+  if (!process.env.JWT_SECRET) {
+    return response.status(500).json({
+      message: "Erro de configuração no servidor (JWT_SECRET ausente)",
+    });
+  }
 
+  try {
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET as string
     ) as TokenPayload;
 
-    (request as any).user = {
+    request.user = {
       id: decoded.sub,
       perfil: decoded.perfil,
+      universityId: decoded.universityId || null,
     };
 
     return next();
-
   } catch {
     return response.status(401).json({
       message: "Token inválido",

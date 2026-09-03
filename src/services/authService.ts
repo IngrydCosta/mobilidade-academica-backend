@@ -1,44 +1,48 @@
 import { prisma } from "../database/prisma";
+import { Request, Response } from "express";
 import { compare } from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export class AuthService {
-
-  async login(email: string, password: string) {
+  async login(email: string, password: string, response: Response) {
 
     const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+        where: {
+          email,
+        },
+      });
+      
 
-    if (!user) {
-      throw new Error("Email ou senha inválidos");
-    }
+      if (!user) {
+        throw new Error("Email ou senha inválidos");
+      }
 
-    const passwordMatch = await compare(
-      password,
-      user.password
-    );
+      const passwordMatch = await compare(password, user.password);
 
-    if (!passwordMatch) {
-      throw new Error("Email ou senha inválidos");
-    }
+      if (!passwordMatch) {
+        throw new Error("Email ou senha inválidos");
+      }
 
-   const token = jwt.sign(
-  {
-    perfil: user.perfil,
-  },
-  process.env.JWT_SECRET as string,
-  {
-    subject: user.id,
-    expiresIn: "1d",
+      if (!process.env.JWT_SECRET) {
+        throw new Error("JWT_SECRET não configurado nas variáveis de ambiente");
+      }
+
+      const token = jwt.sign(
+        {
+          perfil: user.perfil,
+          universityId: user.universityId || null,
+        },
+        process.env.JWT_SECRET as string,
+        {
+          subject: user.id,
+          expiresIn: "1d",
+        },
+      );
+      const { password: userPassword, ...userNotPassword } = user;
+      return {
+        user: userNotPassword,
+        token,
+      };
+
   }
-  
-);
-return {
-    user,
-    token,
-  };
 }
-};

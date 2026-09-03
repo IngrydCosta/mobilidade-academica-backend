@@ -47,6 +47,7 @@ model University {
 model Mobility {
   id            String   @id @default(cuid())
   ano           Int
+  semestre      Int      @default(1)
   enviados      Int
   recebidos     Int
 
@@ -59,15 +60,18 @@ model Mobility {
 }
 
 model MobilityStudent{
-  id             String @id @default(uuid())
-  matricula      String
-  nome           String
-  email          String
-  paisOrigem     String
-  paisDestino    String
-  cursoOrigem    String
-  cursoDestino   String
+  id                  String @id @default(uuid())
+  matricula           String
+  nome                String
+  email               String
+  paisOrigem          String
+  paisDestino         String
+  tipoMobilidade      String @default("ENVIADO")
+  cursoOrigem         String
+  cursoDestino        String
+  universidadeOrigem  String @default("")
+  universidadeDestino String
 
-  mobilityId     String
-  mobility       Mobility @relation(fields: [mobilityId], references: [id])
+  mobilityId          String
+  mobility            Mobility @relation(fields: [mobilityId], references: [id])
 }

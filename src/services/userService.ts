@@ -9,10 +9,15 @@ export class UserService {
     email: string,
     password: string,
     perfil: UserRole,
-    universityId?: string,
+    universityId?: string
   ) {
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
-    const passwordHash = await hash(password, 8);
+    if (existingUser) {
+      throw new Error("Email já cadastrado.");
+    }
 
     if (
       perfil === UserRole.GESTOR_MOBILIDADE &&
@@ -23,37 +28,90 @@ export class UserService {
       );
     }
 
-    return prisma.user.create({
+    const passwordHash = await hash(password, 8);
+
+    const user = await prisma.user.create({
       data: {
         nome,
         email,
         password: passwordHash,
         perfil: perfil,
         ...(universityId && {
+          university: {
+            connect: {
+              id: universityId,
+            },
+          },
+        }),
+      },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        perfil: true,
+        universityId: true,
         university: {
-          connect: {
-            id: universityId,
+          select: {
+            id: true,
+            nome: true,
+            pais: true,
           },
         },
-      })
+        createdAt: true,
+        updatedAt: true,
       },
     });
+
+    return user;
   }
+
   async findAll() {
     return prisma.user.findMany({
-      include: {
-        university: true,
-      }
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        perfil: true,
+        universityId: true,
+        university: {
+          select: {
+            id: true,
+            nome: true,
+            pais: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
     });
-
   }
 
   async getUserId(id: string) {
-    return prisma.user.findUnique({
-      where: {
-        id,
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        perfil: true,
+        universityId: true,
+        university: {
+          select: {
+            id: true,
+            nome: true,
+            pais: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
       },
     });
+
+    if (!user) {
+      throw new Error("Usuário não encontrado!");
+    }
+
+    return user;
   }
 
   async updateUser(
@@ -62,54 +120,73 @@ export class UserService {
     email: string,
     password: string,
     perfil: UserRole,
-    universityId: string,
+    universityId?: string
   ) {
-
-    const passwordHash = await hash(password, 8);
-
-    const getUserId = await prisma.user.findUnique({
-      where: {
-        id,
-      },
+    const existingUser = await prisma.user.findUnique({
+      where: { id },
     });
 
-    if (!getUserId) {
-      return "Usuário não encontrado!";
+    if (!existingUser) {
+      throw new Error("Usuário não encontrado!");
     }
+
+    if (email && email !== existingUser.email) {
+      const emailInUse = await prisma.user.findUnique({
+        where: { email },
+      });
+      if (emailInUse) {
+        throw new Error("Email já cadastrado em outra conta.");
+      }
+    }
+
+    const dataToUpdate: any = {
+      nome,
+      email,
+      perfil,
+      universityId: universityId !== undefined ? (universityId || null) : undefined,
+    };
+
+    if (password && password.trim() !== "") {
+      dataToUpdate.password = await hash(password, 8);
+    }
+
     const updatedUser = await prisma.user.update({
-      where: {
-        id,
+      where: { id },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        perfil: true,
+        universityId: true,
+        university: {
+          select: {
+            id: true,
+            nome: true,
+            pais: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
       },
-      data: {
-        nome,
-        email,
-        password: passwordHash,
-        perfil,
-        universityId: universityId !== undefined ? (universityId || null) : undefined,
-            },
-          });
+    });
 
     return updatedUser;
   }
 
   async deleteUser(id: string) {
     const getUser = await prisma.user.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
     if (!getUser) {
-      return "Usuário não encontrado!";
+      throw new Error("Usuário não encontrado!");
     }
 
     await prisma.user.delete({
-      where: {
-        id,
-      },
+      where: { id },
     });
-    return "Usuário deletado com sucesso!";
+
+    return { message: "Usuário deletado com sucesso!" };
   }
-
-
 }
