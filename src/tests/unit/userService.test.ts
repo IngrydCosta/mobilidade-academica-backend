@@ -107,9 +107,9 @@ describe('UserService Unit Tests', () => {
   });
 
   describe('updateUser', () => {
-    it('deve atualizar o usuário com sucesso', async () => {
+    it('deve atualizar o usuário com sucesso e limpar universidade para perfil ADMINISTRADOR', async () => {
       const existingUser = { id: 'u-1', email: 'old@test.com' };
-      const updatedUser = { id: 'u-1', nome: 'Ana Silva', email: 'new@test.com', perfil: UserRole.ADMINISTRADOR };
+      const updatedUser = { id: 'u-1', nome: 'Ana Silva', email: 'new@test.com', perfil: UserRole.ADMINISTRADOR, universityId: null };
 
       vi.mocked(prisma.user.findUnique)
         .mockResolvedValueOnce(existingUser as any)
@@ -117,10 +117,16 @@ describe('UserService Unit Tests', () => {
 
       vi.mocked(prisma.user.update).mockResolvedValue(updatedUser as any);
 
-      const result = await service.updateUser('u-1', 'Ana Silva', 'new@test.com', '', UserRole.ADMINISTRADOR);
+      const result = await service.updateUser('u-1', 'Ana Silva', 'new@test.com', UserRole.ADMINISTRADOR, 'uni-123');
 
       expect(result).toEqual(updatedUser);
-      expect(prisma.user.update).toHaveBeenCalled();
+      expect(prisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            universityId: null,
+          }),
+        })
+      );
     });
   });
 

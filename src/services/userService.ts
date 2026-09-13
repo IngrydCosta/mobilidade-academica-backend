@@ -26,9 +26,11 @@ export class UserService {
       throw new Error("O perfil do usuário é obrigatório.");
     }
 
+    const effectiveUniversityId = perfil === UserRole.ADMINISTRADOR ? undefined : universityId;
+
     if (
       perfil === UserRole.GESTOR_MOBILIDADE &&
-      (!universityId || universityId.trim() === "")
+      (!effectiveUniversityId || effectiveUniversityId.trim() === "")
     ) {
       throw new Error(
         "Para o perfil de Gestor de Mobilidade, a universidade é obrigatória."
@@ -44,10 +46,10 @@ export class UserService {
         email,
         password: passwordHash,
         perfil: perfil,
-        ...(universityId && {
+        ...(effectiveUniversityId && {
           university: {
             connect: {
-              id: universityId,
+              id: effectiveUniversityId,
             },
           },
         }),
@@ -133,7 +135,6 @@ export class UserService {
     id: string,
     nome: string,
     email: string,
-    password: string,
     perfil: UserRole,
     universityId?: string
   ) {
@@ -154,16 +155,16 @@ export class UserService {
       }
     }
 
+    const effectiveUniversityId = perfil === UserRole.ADMINISTRADOR
+      ? null
+      : (universityId !== undefined ? (universityId || null) : undefined);
+
     const dataToUpdate: any = {
       nome,
       email,
       perfil,
-      universityId: universityId !== undefined ? (universityId || null) : undefined,
+      universityId: effectiveUniversityId,
     };
-
-    if (password && password.trim() !== "") {
-      dataToUpdate.password = await hash(password, 8);
-    }
 
     const updatedUser = await prisma.user.update({
       where: { id },

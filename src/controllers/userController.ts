@@ -56,13 +56,12 @@ export class UserController {
   async updateUser(request: Request, response: Response) {
     try {
       const id = request.params.id as string;
-      const { nome, email, password, perfil, universityId } = request.body || {};
+      const { nome, email, perfil, universityId } = request.body || {};
 
       const updatedUser = await userService.updateUser(
         id,
         nome,
         email,
-        password,
         perfil,
         universityId
       );
