@@ -3,12 +3,15 @@ import { prisma } from "../database/prisma";
 import { hash } from "bcryptjs";
 
 
+import { generateRandomPassword } from "../utils/generatePassword";
+import { emailService } from "./emailService";
+
 export class UserService {
   async create(
     nome: string,
     email: string,
-    password: string,
-    perfil: UserRole,
+    password?: string,
+    perfil?: UserRole,
     universityId?: string
   ) {
     const existingUser = await prisma.user.findUnique({
@@ -17,6 +20,10 @@ export class UserService {
 
     if (existingUser) {
       throw new Error("Email já cadastrado.");
+    }
+
+    if (!perfil) {
+      throw new Error("O perfil do usuário é obrigatório.");
     }
 
     if (
@@ -28,7 +35,8 @@ export class UserService {
       );
     }
 
-    const passwordHash = await hash(password, 8);
+    const rawPassword = (password && password.trim() !== "") ? password : generateRandomPassword(8);
+    const passwordHash = await hash(rawPassword, 8);
 
     const user = await prisma.user.create({
       data: {
@@ -62,7 +70,14 @@ export class UserService {
       },
     });
 
-    return user;
+    emailService.sendWelcomeEmail(user.email, user.nome, rawPassword).catch((err) => {
+      console.error("Erro ao enviar e-mail no cadastro:", err);
+    });
+
+    return {
+      ...user,
+      generatedPassword: rawPassword,
+    };
   }
 
   async findAll() {

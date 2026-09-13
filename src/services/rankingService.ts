@@ -10,13 +10,12 @@ export class RankingService {
       },
     });
 
- 
     const universityMap = new Map<
       string,
       { universidade: string; pais: string; total: number }
     >();
 
-    mobilities.forEach((item) => {
+    mobilities.forEach((item: any) => {
       const key = item.universityId;
 
       const total = item.enviados + item.recebidos;
@@ -38,10 +37,9 @@ export class RankingService {
       (a, b) => b.total - a.total
     );
 
-   
     const countryMap = new Map<string, number>();
 
-    mobilities.forEach((item) => {
+    mobilities.forEach((item: any) => {
       const total = item.enviados + item.recebidos;
 
       const current = countryMap.get(item.university.pais) || 0;

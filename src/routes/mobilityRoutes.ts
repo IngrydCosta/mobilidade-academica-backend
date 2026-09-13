@@ -13,4 +13,7 @@ mobilityRoutes.get("/:id", authMiddleware, canManageMobility, mobilityController
 mobilityRoutes.put("/:id", authMiddleware, canManageMobility, mobilityController.updateMobility);
 mobilityRoutes.delete("/:id", authMiddleware, canManageMobility, mobilityController.deleteMobility);
 
+mobilityRoutes.put("/students/:studentId", authMiddleware, canManageMobility, mobilityController.updateStudent);
+mobilityRoutes.delete("/students/:studentId", authMiddleware, canManageMobility, mobilityController.deleteStudent);
+
 export default mobilityRoutes;

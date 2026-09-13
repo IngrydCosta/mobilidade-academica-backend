@@ -62,7 +62,7 @@ export class UniversityController {
       return response.status(200).json(deletedUniversity);
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Erro ao deletar universidade";
-      const status = msg.includes("não encontrada") ? 404 : 500;
+      const status = msg.includes("não encontrada") ? 404 : msg.includes("não é permitida") ? 400 : 500;
       return response.status(status).json({ message: msg });
     }
   }

@@ -47,19 +47,7 @@ export class UniversityService {
     return updatedUniversity;
   }
 
-  async deleteUniversity(id: string) {
-    const findUniversity = await prisma.university.findUnique({
-      where: { id },
-    });
-
-    if (!findUniversity) {
-      throw new Error("Universidade não encontrada");
-    }
-
-    await prisma.university.delete({
-      where: { id },
-    });
-
-    return { message: "Universidade deletada com sucesso!" };
+  async deleteUniversity(_id: string) {
+    throw new Error("A exclusão de universidades não é permitida para preservar o histórico de dados do sistema.");
   }
 }

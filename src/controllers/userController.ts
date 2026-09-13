@@ -31,9 +31,9 @@ export class UserController {
     try {
       const { nome, email, password, perfil, universityId } = request.body || {};
 
-      if (!nome || !email || !password || !perfil) {
+      if (!nome || !email || !perfil) {
         return response.status(400).json({
-          message: "Preencha todos os campos obrigatórios (nome, email, password, perfil).",
+          message: "Preencha todos os campos obrigatórios (nome, email, perfil).",
         });
       }
 

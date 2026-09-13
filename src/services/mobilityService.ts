@@ -162,4 +162,37 @@ export class MobilityService {
 
     return { message: "Mobilidade deletada com sucesso!" };
   }
+
+  async deleteStudent(studentId: string) {
+    const student = await prisma.mobilityStudent.findUnique({
+      where: { id: studentId },
+    });
+
+    if (!student) {
+      throw new Error("Estudante de mobilidade não encontrado.");
+    }
+
+    await prisma.mobilityStudent.delete({
+      where: { id: studentId },
+    });
+
+    return { message: "Estudante removido com sucesso!" };
+  }
+
+  async updateStudent(studentId: string, data: Partial<StudentData>) {
+    const student = await prisma.mobilityStudent.findUnique({
+      where: { id: studentId },
+    });
+
+    if (!student) {
+      throw new Error("Estudante de mobilidade não encontrado.");
+    }
+
+    const updated = await prisma.mobilityStudent.update({
+      where: { id: studentId },
+      data,
+    });
+
+    return updated;
+  }
 }

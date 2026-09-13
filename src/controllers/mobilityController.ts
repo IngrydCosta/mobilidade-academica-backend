@@ -11,7 +11,7 @@ export class MobilityController {
       const user = request.user;
       let universityFilter: string | undefined = undefined;
 
-      if (user?.perfil === UserRole.GESTOR_MOBILIDADE) {
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
         if (!user.universityId) {
           return response.status(403).json({
             message: "Gestor sem universidade vinculada",
@@ -36,7 +36,7 @@ export class MobilityController {
 
       const mobility = await mobilityService.getMobilityId(id as string);
 
-      if (user?.perfil === UserRole.GESTOR_MOBILIDADE) {
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
         if (mobility.universityId !== user.universityId) {
           return response.status(403).json({
             message: "Acesso restrito à sua universidade",
@@ -59,7 +59,7 @@ export class MobilityController {
 
       let targetUniversityId = universityId;
 
-      if (user?.perfil === UserRole.GESTOR_MOBILIDADE) {
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
         if (!user.universityId) {
           return response.status(403).json({
             message: "Gestor de mobilidade sem universidade vinculada.",
@@ -99,7 +99,7 @@ export class MobilityController {
 
       const existingMobility = await mobilityService.getMobilityId(id);
 
-      if (user?.perfil === UserRole.GESTOR_MOBILIDADE) {
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
         if (existingMobility.universityId !== user.universityId) {
           return response.status(403).json({
             message: "Acesso restrito à sua universidade",
@@ -108,7 +108,7 @@ export class MobilityController {
       }
 
       let targetUniversityId = universityId || existingMobility.universityId;
-      if (user?.perfil === UserRole.GESTOR_MOBILIDADE) {
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
         targetUniversityId = user.universityId!;
       }
 
@@ -136,7 +136,7 @@ export class MobilityController {
 
       const existingMobility = await mobilityService.getMobilityId(id);
 
-      if (user?.perfil === UserRole.GESTOR_MOBILIDADE) {
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
         if (existingMobility.universityId !== user.universityId) {
           return response.status(403).json({
             message: "Acesso restrito à sua universidade",
@@ -150,6 +150,29 @@ export class MobilityController {
       const msg = error instanceof Error ? error.message : "Erro ao deletar mobilidade";
       const status = msg.includes("não encontrada") ? 404 : 500;
       return response.status(status).json({ message: msg });
+    }
+  }
+
+  async deleteStudent(request: AuthRequest, response: Response) {
+    try {
+      const { studentId } = request.params;
+      const result = await mobilityService.deleteStudent(studentId as string);
+      return response.status(200).json(result);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Erro ao deletar estudante";
+      return response.status(400).json({ message: msg });
+    }
+  }
+
+  async updateStudent(request: AuthRequest, response: Response) {
+    try {
+      const { studentId } = request.params;
+      const data = request.body || {};
+      const updated = await mobilityService.updateStudent(studentId as string, data);
+      return response.status(200).json(updated);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Erro ao atualizar estudante";
+      return response.status(400).json({ message: msg });
     }
   }
 }
