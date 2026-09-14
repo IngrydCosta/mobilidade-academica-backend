@@ -156,6 +156,13 @@ export class MobilityController {
   async deleteStudent(request: AuthRequest, response: Response) {
     try {
       const { studentId } = request.params;
+      const user = request.user;
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
+        const student = await mobilityService.findStudentById(studentId as string);
+        if (!student || student.mobility.universityId !== user.universityId) {
+          return response.status(403).json({ message: "Acesso restrito à sua universidade" });
+        }
+      }
       const result = await mobilityService.deleteStudent(studentId as string);
       return response.status(200).json(result);
     } catch (error) {
@@ -168,6 +175,13 @@ export class MobilityController {
     try {
       const { studentId } = request.params;
       const data = request.body || {};
+      const user = request.user;
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
+        const student = await mobilityService.findStudentById(studentId as string);
+        if (!student || student.mobility.universityId !== user.universityId) {
+          return response.status(403).json({ message: "Acesso restrito à sua universidade" });
+        }
+      }
       const updated = await mobilityService.updateStudent(studentId as string, data);
       return response.status(200).json(updated);
     } catch (error) {
@@ -180,6 +194,13 @@ export class MobilityController {
     try {
       const { id } = request.params;
       const studentData = request.body || {};
+      const user = request.user;
+      if (user && user.perfil === UserRole.GESTOR_MOBILIDADE) {
+        const mobility = await mobilityService.getMobilityId(id as string);
+        if (!mobility || mobility.universityId !== user.universityId) {
+          return response.status(403).json({ message: "Acesso restrito à sua universidade" });
+        }
+      }
       const newStudent = await mobilityService.addStudentToMobility(id as string, studentData);
       return response.status(201).json(newStudent);
     } catch (error) {

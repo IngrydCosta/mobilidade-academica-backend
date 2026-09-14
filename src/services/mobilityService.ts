@@ -283,4 +283,11 @@ export class MobilityService {
 
     return student;
   }
+
+  async findStudentById(studentId: string) {
+    return prisma.mobilityStudent.findUnique({
+      where: { id: studentId },
+      include: { mobility: true },
+    });
+  }
 }

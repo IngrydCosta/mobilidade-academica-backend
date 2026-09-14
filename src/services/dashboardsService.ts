@@ -72,11 +72,17 @@ export class DashboardsService {
     };
   }
 
-  async dashPrivateService(filters: {
-    university?: string;
-    country?: string;
-    year?: number;
-  }) {
+  async dashPrivateService(
+    filters: {
+      university?: string;
+      country?: string;
+      year?: number;
+    },
+    currentUser?: {
+      perfil?: string;
+      universityId?: string | null;
+    }
+  ) {
     let mobilities = await prisma.mobility.findMany({
       include: {
         university: true,
@@ -108,15 +114,34 @@ export class DashboardsService {
     const totalEnviados = mobilities.reduce((acc: number, m: any) => acc + m.enviados, 0);
     const totalRecebidos = mobilities.reduce((acc: number, m: any) => acc + m.recebidos, 0);
 
-    const table = mobilities.map((m: any) => ({
-      universidade: m.university.nome,
-      pais: m.university.pais,
-      ano: m.ano,
-      enviados: m.enviados,
-      recebidos: m.recebidos,
-      total: m.enviados + m.recebidos,
-      students: m.students,
-    }));
+    const table = mobilities.map((m: any) => {
+      const isOwnerOrAdmin =
+        !currentUser ||
+        currentUser.perfil === "ADMINISTRADOR" ||
+        (currentUser.perfil === "GESTOR_MOBILIDADE" && currentUser.universityId && m.universityId === currentUser.universityId);
+
+      const sanitizedStudents = (m.students || []).map((st: any) => {
+        if (isOwnerOrAdmin) {
+          return st;
+        }
+        return {
+          ...st,
+          nome: "---",
+          email: "---",
+          matricula: "---",
+        };
+      });
+
+      return {
+        universidade: m.university.nome,
+        pais: m.university.pais,
+        ano: m.ano,
+        enviados: m.enviados,
+        recebidos: m.recebidos,
+        total: m.enviados + m.recebidos,
+        students: sanitizedStudents,
+      };
+    });
 
     const yearData = new Map<number, { enviados: number; recebidos: number }>();
 
