@@ -13,6 +13,7 @@ mobilityRoutes.get("/:id", authMiddleware, canManageMobility, mobilityController
 mobilityRoutes.put("/:id", authMiddleware, canManageMobility, mobilityController.updateMobility);
 mobilityRoutes.delete("/:id", authMiddleware, canManageMobility, mobilityController.deleteMobility);
 
+mobilityRoutes.post("/:id/students", authMiddleware, canManageMobility, mobilityController.addStudent);
 mobilityRoutes.put("/students/:studentId", authMiddleware, canManageMobility, mobilityController.updateStudent);
 mobilityRoutes.delete("/students/:studentId", authMiddleware, canManageMobility, mobilityController.deleteStudent);
 

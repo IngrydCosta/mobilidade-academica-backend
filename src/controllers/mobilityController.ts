@@ -175,4 +175,16 @@ export class MobilityController {
       return response.status(400).json({ message: msg });
     }
   }
+
+  async addStudent(request: AuthRequest, response: Response) {
+    try {
+      const { id } = request.params;
+      const studentData = request.body || {};
+      const newStudent = await mobilityService.addStudentToMobility(id as string, studentData);
+      return response.status(201).json(newStudent);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Erro ao adicionar estudante";
+      return response.status(400).json({ message: msg });
+    }
+  }
 }

@@ -9,6 +9,7 @@ vi.mock('../../database/prisma', () => ({
     },
     mobility: {
       create: vi.fn(),
+      findFirst: vi.fn(),
       findMany: vi.fn(),
       findUnique: vi.fn(),
       update: vi.fn(),
@@ -16,7 +17,10 @@ vi.mock('../../database/prisma', () => ({
     },
     mobilityStudent: {
       findUnique: vi.fn(),
+      findMany: vi.fn().mockResolvedValue([]),
+      createMany: vi.fn(),
       delete: vi.fn(),
+      deleteMany: vi.fn(),
       update: vi.fn(),
     },
   },
@@ -100,6 +104,7 @@ describe('MobilityService Unit Tests', () => {
       expect(prisma.mobility.findMany).toHaveBeenCalledWith({
         where: {},
         include: { university: true, students: true },
+        orderBy: [{ ano: 'desc' }, { semestre: 'desc' }],
       });
     });
 
@@ -112,6 +117,7 @@ describe('MobilityService Unit Tests', () => {
       expect(prisma.mobility.findMany).toHaveBeenCalledWith({
         where: { universityId: 'uni-porto' },
         include: { university: true, students: true },
+        orderBy: [{ ano: 'desc' }, { semestre: 'desc' }],
       });
     });
   });
