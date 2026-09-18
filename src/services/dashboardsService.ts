@@ -53,6 +53,27 @@ export class DashboardsService {
       }
     });
 
+    const countryData = new Map<string, { enviados: number; recebidos: number }>();
+
+    mobilities.forEach((m: any) => {
+      const pais = m.university?.pais?.trim() || "Não informado";
+      const current = countryData.get(pais) || { enviados: 0, recebidos: 0 };
+      countryData.set(pais, {
+        enviados: current.enviados + m.enviados,
+        recebidos: current.recebidos + m.recebidos,
+      });
+    });
+
+    const graficoPaises = Array.from(countryData.entries())
+      .map(([pais, values]) => ({
+        pais,
+        enviados: values.enviados,
+        recebidos: values.recebidos,
+        total: values.enviados + values.recebidos,
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
     return {
       cards: {
         total,
@@ -62,6 +83,7 @@ export class DashboardsService {
       },
 
       grafico, 
+      graficoPaises,
 
       indicators: {
         mediaPorAno,
@@ -107,6 +129,7 @@ export class DashboardsService {
       return {
         cards: { total: 0, enviados: 0, recebidos: 0, anoTop: 0 },
         grafico: [],
+        graficoPaises: [],
         table: [],
       };
     }
@@ -172,6 +195,27 @@ export class DashboardsService {
       }
     });
 
+    const countryData = new Map<string, { enviados: number; recebidos: number }>();
+
+    mobilities.forEach((m: any) => {
+      const pais = m.university?.pais?.trim() || "Não informado";
+      const current = countryData.get(pais) || { enviados: 0, recebidos: 0 };
+      countryData.set(pais, {
+        enviados: current.enviados + m.enviados,
+        recebidos: current.recebidos + m.recebidos,
+      });
+    });
+
+    const graficoPaises = Array.from(countryData.entries())
+      .map(([pais, values]) => ({
+        pais,
+        enviados: values.enviados,
+        recebidos: values.recebidos,
+        total: values.enviados + values.recebidos,
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
     return {
       cards: {
         total: totalEnviados + totalRecebidos,
@@ -180,7 +224,8 @@ export class DashboardsService {
         anoTop: bestYear,
       },
 
-      grafico,        
+      grafico,
+      graficoPaises,
       table,
     };
   }
