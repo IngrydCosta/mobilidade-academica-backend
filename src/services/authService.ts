@@ -66,7 +66,6 @@ export class AuthService {
 
     return {
       message: "Nova senha temporária enviada para o seu e-mail com sucesso!",
-      tempPassword,
     };
   }
 

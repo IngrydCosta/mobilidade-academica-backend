@@ -116,9 +116,10 @@ export class DashboardsService {
 
     const table = mobilities.map((m: any) => {
       const isOwnerOrAdmin =
-        !currentUser ||
-        currentUser.perfil === "ADMINISTRADOR" ||
-        (currentUser.perfil === "GESTOR_MOBILIDADE" && currentUser.universityId && m.universityId === currentUser.universityId);
+        currentUser?.perfil === "ADMINISTRADOR" ||
+        (currentUser?.perfil === "GESTOR_MOBILIDADE" &&
+          Boolean(currentUser?.universityId) &&
+          m.universityId === currentUser?.universityId);
 
       const sanitizedStudents = (m.students || []).map((st: any) => {
         if (isOwnerOrAdmin) {

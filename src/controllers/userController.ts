@@ -58,6 +58,12 @@ export class UserController {
       const id = request.params.id as string;
       const { nome, email, perfil, universityId } = request.body || {};
 
+      if (!nome || !email || !perfil) {
+        return response.status(400).json({
+          message: "Preencha todos os campos obrigatórios (nome, email, perfil).",
+        });
+      }
+
       const updatedUser = await userService.updateUser(
         id,
         nome,
@@ -69,7 +75,7 @@ export class UserController {
       return response.status(200).json(updatedUser);
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Erro ao atualizar usuário";
-      const status = msg.includes("não encontrado") ? 404 : msg.includes("já cadastrado") ? 400 : 500;
+      const status = msg.includes("não encontrado") ? 404 : msg.includes("já cadastrado") || msg.includes("obrigatór") || msg.includes("inválid") ? 400 : 500;
       return response.status(status).json({ message: msg });
     }
   }

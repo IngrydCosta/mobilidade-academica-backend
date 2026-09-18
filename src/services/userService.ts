@@ -138,6 +138,10 @@ export class UserService {
     perfil: UserRole,
     universityId?: string
   ) {
+    if (!id || id.trim() === "") {
+      throw new Error("ID do usuário é obrigatório.");
+    }
+
     const existingUser = await prisma.user.findUnique({
       where: { id },
     });
@@ -146,9 +150,29 @@ export class UserService {
       throw new Error("Usuário não encontrado!");
     }
 
-    if (email && email !== existingUser.email) {
+    const cleanNome = (nome || "").trim();
+    if (!cleanNome) {
+      throw new Error("O nome do usuário é obrigatório.");
+    }
+
+    const cleanEmail = (email || "").trim();
+    if (!cleanEmail) {
+      throw new Error("O e-mail do usuário é obrigatório.");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      throw new Error("Formato de e-mail inválido.");
+    }
+
+    const validRoles = [UserRole.ADMINISTRADOR, UserRole.GESTOR_MOBILIDADE, UserRole.ESTUDANTE];
+    if (!perfil || !validRoles.includes(perfil)) {
+      throw new Error("Perfil de usuário inválido.");
+    }
+
+    if (cleanEmail !== existingUser.email) {
       const emailInUse = await prisma.user.findUnique({
-        where: { email },
+        where: { email: cleanEmail },
       });
       if (emailInUse) {
         throw new Error("Email já cadastrado em outra conta.");
@@ -159,9 +183,18 @@ export class UserService {
       ? null
       : (universityId !== undefined ? (universityId || null) : undefined);
 
+    if (
+      perfil === UserRole.GESTOR_MOBILIDADE &&
+      (!effectiveUniversityId || effectiveUniversityId.trim() === "")
+    ) {
+      throw new Error(
+        "Para o perfil de Gestor de Mobilidade, a universidade é obrigatória."
+      );
+    }
+
     const dataToUpdate: any = {
-      nome,
-      email,
+      nome: cleanNome,
+      email: cleanEmail,
       perfil,
       universityId: effectiveUniversityId,
     };
