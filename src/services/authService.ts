@@ -51,7 +51,9 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new Error("E-mail não encontrado no sistema.");
+      return {
+      message: "Se esse e-mail estiver em nosso sistema, você receberá um link para criar uma nova senha.",
+    };
     }
 
     const tempPassword = generateRandomPassword(8);
@@ -65,7 +67,7 @@ export class AuthService {
     await emailService.sendPasswordResetEmail(user.email, user.nome, tempPassword);
 
     return {
-      message: "Nova senha temporária enviada para o seu e-mail com sucesso!",
+      message: "Se esse e-mail estiver em nosso sistema, você receberá um link para criar uma nova senha.",
     };
   }
 
