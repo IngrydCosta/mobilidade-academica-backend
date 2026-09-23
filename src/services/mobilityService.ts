@@ -125,8 +125,8 @@ export class MobilityService {
       throw new Error("Universidade não encontrada");
     }
 
-    if (!Array.isArray(estudantes)) {
-      throw new Error("O campo 'estudantes' deve ser uma lista.");
+    if (!Array.isArray(estudantes) || estudantes.length === 0) {
+      throw new Error("É obrigatório informar ao menos um estudante para cadastrar a mobilidade.");
     }
 
     const validatedStudents: StudentData[] = estudantes.map((st, idx) => validateStudent(st, idx));
